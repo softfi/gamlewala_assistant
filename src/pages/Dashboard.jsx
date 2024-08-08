@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import "/node_modules/flag-icons/css/flag-icons.min.css";
 import useSession, { deleteSession } from "../hooks/session";
 import { GetData } from "../Apis/Getters/GetData";
@@ -7,31 +6,41 @@ import Datatable from "../Components/DataTableComponent/Datatable";
 
 const Dashboard = () => {
   //ORDER LIST STATE
-  const [orderListData, setOrderListData] = useState([]);
+  const [orderListData, setOrderListData] = useState({
+    totalOrder: 0,
+    totalSales: 0,
+    recentProducts: [],
+    topSellingProduct: []
+  });
   // SESSION CUSTOM HOOK
   const [setSession, getSession] = useSession();
   // const [roles, setRoles] = useSession([])
 
-  const [recentProducts, getRecentProducts] = useState([]);
+
+
 
   useEffect(() => {
     let token = getSession("authorization");
-    // GetData({ url: "roles", token: token })
-    //     .then((res) => {
-    //         setRoles(res.data.data.roleList);
-    //     })
-    //     .catch((err) => {
-    //       if (err?.response?.status == "401") {
-    //         deleteSession("authorization");
-    //         window.location.href = `${process.env.REACT_APP_BASE_URL}`
-    //       }}) 
+    GetData({ url: "dashboard", token: token })
+      .then((res) => {
+        setOrderListData({
+          totalOrder: res?.data?.data?.totalOrders,
+          totalSales: res?.data?.data?.totalAmountToPay,
+          recentProducts: res?.data?.data?.productLists,
+          topSellingProduct: res?.data?.data?.topSellingProductLists
+        })
+
+      })
+      .catch((err) => {
+        if (err?.response?.status == "401") {
+          deleteSession("authorization");
+          window.location.href = `${process.env.REACT_APP_BASE_URL}`
+        }
+      })
   }, [alert]);
 
 
 
-  const data = [...recentProducts];
-  const sellerData = [...recentProducts];
-  const topProductData = [...recentProducts];
 
   const columns = [
     {
@@ -91,28 +100,6 @@ const Dashboard = () => {
     // },
   ];
 
-  const sellerColumns = [
-    {
-      title: "NAME",
-      key: "name",
-      dataIndex: "name",
-    },
-    {
-      title: "PRODUCT",
-      key: "product",
-      dataIndex: "product",
-    },
-    {
-      title: "REVENUE",
-      key: "revenue",
-      dataIndex: "revenue",
-    },
-    {
-      title: "STATUS",
-      key: "status",
-      dataIndex: "status",
-    },
-  ];
 
   const topProductColumns = [
     {
@@ -121,106 +108,38 @@ const Dashboard = () => {
       dataIndex: "name",
     },
     {
-      title: "PRICE",
-      key: "price",
-      dataIndex: "price",
+      title: "Sales",
+      key: "sales",
+      dataIndex: "sales",
     },
     {
       title: "REVENUE",
-      key: "revenue",
-      dataIndex: "revenue",
+      key: "totalRevenue",
+      dataIndex: "totalRevenue",
     },
     {
       title: "STATUS",
       key: "status",
       dataIndex: "status",
+      render: (_, elem) => (
+        <div className="text-left px-2 py-1">
+          <div className="text-left">{elem.status == "approved" ?
+            <div className="badge bg-success">{elem.status}</div>
+            :
+            <div className="badge bg-danger">{elem.status}</div>}
+          </div>
+        </div>
+      )
     },
   ];
 
-  // GETTING DASHBOARD STATICS
-  const totalSales = orderListData?.reduce((total, current) => {
-    const sales = total + Number(current?.grandTotal);
-    return sales;
-  }, 0);
-  const averagevalue = totalSales / orderListData?.length;
 
-  // MAPPING RECENT OREDERS
-  const recentOrders = orderListData?.reverse()?.slice(0, 10).map((elem, index) => {
-    return (
-      <tr key={index + 1}>
-        {/* <td>
-          <div className="d-flex px-2 py-1">
-            <div className="d-flex flex-column justify-content-center">
-              <h6 className="mb-0 text-sm">
-                <Link to={"/orders/order/" + elem._id}>{elem?.orderNo}</Link>
-              </h6>
-            </div>
-          </div>
-        </td>
-        <td className="align-middle">
-          <div className=" text-center px-2 py-1">
-            <div className=" text-center">
-              <span className="text-sm">{elem?.customer}</span>
-            </div>
-          </div>
-        </td>
-        <td className="align-middle">
-          <div className=" text-center px-2 py-1">
-            <div className=" text-center">
-              <span className="text-sm">{elem?.customerId}</span>
-            </div>
-          </div>
-        </td>
-        <td className="align-middle">
-          <div className=" text-center px-2 py-1">
-            <div className=" text-center">
-              <span className="text-sm">
-                {new Date(elem?.createdAt).toDateString()}
-              </span>
-            </div>
-          </div>
-        </td>
-        <td>
-          <div className="d-flex px-2 py-1">
-            <div className="d-flex flex-column justify-content-center">
-              {elem.paymentStatus == "unpaid" ?
-                <div className="badge bg-danger">{elem.paymentStatus}</div>
-                :
-                <div className="badge bg-success">{elem.paymentStatus}</div>}
-            </div>
-          </div>
-        </td>
-        <td>
-          <div className="d-flex px-2 py-1">
-            <div className="d-flex flex-column justify-content-center">
-              {elem.orderStatus == "pending" ?
-                <div className="badge bg-danger">{elem.orderStatus}</div>
-                :
-                <div className="badge bg-success">{elem.orderStatus}</div>}
-            </div>
-          </div>
-        </td>
-        <td className="align-middle">
-          <div className=" text-center px-2 py-1">
-            <div className=" text-center">
-              <span className="text-sm">
-                {elem?.grandTotal?.toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "INR",
-                })}
-              </span>
-            </div>
-          </div>
-        </td> */}
-      </tr >
-    );
-  });
 
   return (
     <React.Fragment>
       <div className="container-fluid py-4">
         <div className="row">
-          <div className="col-xl-4 col-sm-6 mb-xl-0 mb-4">
+          {/* <div className="col-xl-4 col-sm-6 mb-xl-0 mb-4">
             <div className="card">
               <div className="card-body p-3">
                 <div className="row">
@@ -245,8 +164,8 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
-          </div>
-          <div className="col-xl-4 col-sm-6 mb-xl-0 mb-4">
+          </div> */}
+          <div className="col-xl-6 col-sm-6 mb-xl-0 mb-4">
             <div className="card">
               <div className="card-body p-3">
                 <div className="row">
@@ -256,7 +175,7 @@ const Dashboard = () => {
                         Total Orders
                       </p>
                       <h5 className="font-weight-bolder mb-0">
-                        {orderListData?.length}
+                        {orderListData?.totalOrder}
                       </h5>
                     </div>
                   </div>
@@ -272,7 +191,7 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-          <div className="col-xl-4 col-sm-6 mb-xl-0 mb-4">
+          <div className="col-xl-6 col-sm-6 mb-xl-0 mb-4">
             <div className="card">
               <div className="card-body p-3">
                 <div className="row">
@@ -282,7 +201,7 @@ const Dashboard = () => {
                         Total Sales
                       </p>
                       <h5 className="font-weight-bolder mb-0">
-                        {Number(totalSales?.toFixed(2))?.toLocaleString(
+                        {Number(orderListData?.totalSales)?.toLocaleString(
                           "en-US",
                           { style: "currency", currency: "INR" }
                         )}
@@ -314,7 +233,7 @@ const Dashboard = () => {
             </div>
             <div className="card-body px-0 pb-2">
               <div className="table-responsive">
-                {<Datatable data={data} columns={columns} />}
+                {<Datatable data={orderListData.recentProducts} columns={columns} />}
               </div>
             </div>
           </div>
@@ -322,19 +241,20 @@ const Dashboard = () => {
             <div className="card-header pb-0">
               <div className="row">
                 <div className="col-lg-6 col-7">
-                  <h6>Top Sellers List</h6>
+                  <h6>Top Selling Products</h6>
                 </div>
               </div>
             </div>
             <div className="card-body px-0 pb-2">
               <div className="table-responsive">
-                {<Datatable data={sellerData} columns={sellerColumns} />}
+                {/* {<Datatable data={sellerData} columns={sellerColumns} />} */}
+                {<Datatable data={orderListData.topSellingProduct} columns={topProductColumns} />}
               </div>
             </div>
           </div>
         </div>
 
-        <div className="card mt-5 col-md-12">
+        {/* <div className="card mt-5 col-md-12">
           <div className="card-header pb-0">
             <div className="row">
               <div className="col-lg-6 col-7">
@@ -344,10 +264,10 @@ const Dashboard = () => {
           </div>
           <div className="card-body px-0 pb-2">
             <div className="table-responsive">
-              {<Datatable data={topProductData} columns={topProductColumns} />}
+              {<Datatable data={orderListData.topSellingProduct} columns={topProductColumns} />}
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* <div className="row my-4">
           <div className="col-md-12 mb-md-0 mb-4">

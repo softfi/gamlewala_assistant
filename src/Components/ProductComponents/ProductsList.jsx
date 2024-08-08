@@ -26,7 +26,7 @@ const ProductsList = () => {
     successMessage: "",
   });
 
-  const [productDetails, setProductDetails] = useState({})
+  const [productDetails, setProductDetails] = useState({});
 
   // GETTING TOKEN FROM SESSION
   let token = getSession("authorization");
@@ -61,7 +61,12 @@ const ProductsList = () => {
       render: (_, elem) => (
         <Link href="app-product.html" className="me-4">
           <div className="sa-symbol sa-symbol--shape--rounded sa-symbol--size--lg">
-            <img src={elem?.image} width="40" height="40" alt="" />
+            <img
+              src={elem?.image ? elem?.image[0]?.url : "abc.png"}
+              width="40"
+              height="40"
+              alt=""
+            />
           </div>
         </Link>
       ),
@@ -70,7 +75,7 @@ const ProductsList = () => {
       title: "PRODUCT",
       key: "name",
       dataIndex: "name",
-      ...columnSearchProps("name"),
+      // ...columnSearchProps("name"),
     },
     {
       title: "CATEGORY",
@@ -85,7 +90,7 @@ const ProductsList = () => {
       ),
     },
     {
-      title: "vendor",
+      title: "VENDOR",
       dataIndex: ["vendor", "name"],
       key: "vendor",
       render: (_, { vendor }) => (
@@ -100,13 +105,13 @@ const ProductsList = () => {
       title: "PRICE",
       key: "price",
       dataIndex: "price",
-      ...columnSearchProps("price"),
+      // ...columnSearchProps("price"),
     },
     {
       title: "MRP",
       key: "mrp",
       dataIndex: "mrp",
-      ...columnSearchProps("mrp"),
+      // ...columnSearchProps("mrp"),
     },
     {
       title: "APPROVAL",
@@ -115,13 +120,16 @@ const ProductsList = () => {
       render: (_, elem) => (
         <div className=" text-left px-2 py-1">
           <div className=" text-left">
-            <div className="badge bg-primary">
-              {elem.status === "pending" ? "Pending" : (elem.status === "approved" ? "Approved" : "Rejected")}
-            </div>
+            {elem.status == "rejected" ? (
+              <div className="badge bg-danger">{elem.status}</div>
+            ) : (
+              <div className="badge bg-success">{elem.status}</div>
+            )}
           </div>
         </div>
       ),
     },
+
     {
       title: "ACTION",
       key: "action",
@@ -156,7 +164,7 @@ const ProductsList = () => {
                 setApprovalStatus(!approvalStatus);
                 setProductDetails({
                   id: elem._id,
-                  mrp: elem.mrp
+                  mrp: elem.mrp,
                 });
               }}
             >
@@ -183,6 +191,7 @@ const ProductsList = () => {
   ];
 
   // API CALL METHOD TO DELETE AN ITEM
+
   // const deleteItem = (id) => {
   //   DeleteData({ url: `product/delete/${id}`, token: token })
   //     .then((res) => {
@@ -252,8 +261,8 @@ const ProductsList = () => {
   const approve = () => {
     const credentials = {
       status: "approved",
-      ...productDetails
-    }
+      ...productDetails,
+    };
 
     EditData({ url: `product/approve`, cred: credentials, token: token })
       .then((res) => {
@@ -279,7 +288,7 @@ const ProductsList = () => {
       .catch((err) => {
         if (err?.response?.status == "401") {
           deleteSession("authorization");
-          window.location.href = `${process.env.REACT_APP_BASE_URL}`
+          window.location.href = `${process.env.REACT_APP_BASE_URL}`;
         } else {
           window.scrollTo(0, 0);
           if (err?.response?.data?.msg) {
@@ -323,10 +332,10 @@ const ProductsList = () => {
   const reject = () => {
     const credentials = {
       status: "rejected",
-      ...productDetails
-    }
+      ...productDetails,
+    };
 
-    console.log(credentials)
+    console.log(credentials);
 
     EditData({ url: `product/approve`, cred: credentials, token: token })
       .then((res) => {
@@ -353,7 +362,7 @@ const ProductsList = () => {
         setRejectionStatus(!rejectionStatus);
         if (err?.response?.status == "401") {
           deleteSession("authorization");
-          window.location.href = `${process.env.REACT_APP_BASE_URL}`
+          window.location.href = `${process.env.REACT_APP_BASE_URL}`;
         } else {
           window.scrollTo(0, 0);
           if (err?.response?.data?.msg) {
@@ -485,7 +494,10 @@ const ProductsList = () => {
                       value={productDetails.answer}
                       placeholder="Reason"
                       onChange={(e) =>
-                        setProductDetails({ ...productDetails, reason: e.target.value })
+                        setProductDetails({
+                          ...productDetails,
+                          reason: e.target.value,
+                        })
                       }
                       required
                     ></textarea>
@@ -525,7 +537,10 @@ const ProductsList = () => {
                       value={productDetails.mrp}
                       placeholder="MRP"
                       onChange={(e) =>
-                        setProductDetails({ ...productDetails, mrp: e.target.value })
+                        setProductDetails({
+                          ...productDetails,
+                          mrp: e.target.value,
+                        })
                       }
                       required
                     />

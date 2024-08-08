@@ -9,7 +9,7 @@ const Datatable = (props) => {
     return (
         <React.Fragment>
             {/* <p className='text-end me-3 text-sm'>*To search in status field type <span className='secondary-color'>1</span> for <span className='secondary-color'>"active"</span> & <span className='secondary-color'>0</span> for <span className='secondary-color'>"hidden"</span></p> */}
-            {<Table columns={props.columns} dataSource={props.data} exportable searchable />}
+            {<Table columns={props.columns} pagination={{ defaultPageSize: 5 }} dataSource={props.data} exportable searchable />}
         </React.Fragment>
     );
 };

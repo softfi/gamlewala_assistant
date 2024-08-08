@@ -46,13 +46,13 @@ const Sidebar = () => {
             <div className="w-100">
               <img
                 src={logo}
-                className="w-100 object-fit-cover"
+                className="w-50 object-fit-cover"
                 alt="logo"
               />
             </div>
             <br></br>
             <h5 className="font-weight-bold text-white text-center">
-              Assistant Panel
+              Vertical Head Panel
             </h5>
           </Link>
         </div>
